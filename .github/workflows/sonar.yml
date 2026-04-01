@@ -1,0 +1,35 @@
+name: Sonar Backend Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  sonar:
+    name: Build & Sonar Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Sonar Packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: sonar-cache
+
+      - name: Build and Analyze
+        run: mvn clean verify sonar:sonar \
+          -Dsonar.projectKey=AMUTHA-ROHITH-P_LOST-FOUND-BACKEND \
+          -Dsonar.organization=amutha-rohith-p \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
