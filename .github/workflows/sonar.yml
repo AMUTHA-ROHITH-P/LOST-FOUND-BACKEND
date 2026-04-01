@@ -8,28 +8,37 @@ on:
 
 jobs:
   sonar:
-    name: Build & Sonar Scan
+    name: Build & Analyze Backend
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      # 1️⃣ Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Java
+      # 2️⃣ Setup Java
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Cache Sonar Packages
+      # 3️⃣ Cache Maven dependencies (faster build)
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-
+
+      # 4️⃣ Cache SonarCloud packages
+      - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: sonar-cache
 
+      # 5️⃣ Build + Sonar Analysis (FIXED COMMAND ✅)
       - name: Build and Analyze
-        run: mvn clean verify sonar:sonar \
-          -Dsonar.projectKey=AMUTHA-ROHITH-P_LOST-FOUND-BACKEND \
-          -Dsonar.organization=amutha-rohith-p \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        run: mvn clean verify sonar:sonar -Dsonar.projectKey=AMUTHA-ROHITH-P_LOST-FOUND-BACKEND -Dsonar.organization=amutha-rohith-p -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
